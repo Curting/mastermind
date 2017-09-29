@@ -1,27 +1,54 @@
-# A game is (8, 10 or) 12 rounds
-# Six different colors
-# Codemaker and a Codebreaker
-# Codemaker chooses a pattern of four code pegs. Duplicates (and blanks) are allowed.
-# The Codebreaker tries to guess the pattern.
-# A colored key peg ● is placed for correct color and position
-# A white key peg ○ is placed for correct color but wrong position
-# If there are duplicate colors, they cannot all be awarded a key peg
-
-
 class Mastermind
-
-  attr_reader :play
 
   def initialize
     @code = []
     @guess = nil
     @guess_count = 0
     @rounds = nil
-    @play = true
 
-    generate_code
+    welcome_message
+    play_game
   end
-  
+    
+  def play_game
+    generate_code
+
+    until game_over?
+      guess_and_evaluate
+    end
+
+    won? ? puts("You won!!") : puts("You lost :-(")
+    sleep(3)
+    puts "\nLet's play again?"
+    sleep(2)
+    reset
+    play_game
+  end
+
+  def welcome_message
+    puts "\nWelcome to Mastermind!"
+    puts "\nYour job is to guess my combination of 4 numbers."
+    puts "Each number is between 1-6."
+    ask_rounds
+    puts "\nYou will get feedback from me after each guess:"
+    puts "\n● = Correct number and position."
+    puts "○ = The number exists in the combination but this is not the position."
+    puts "  = Wrong number."
+    puts "\nYou guess by writing the four numbers (between 1-6) like this:"
+    puts "1 2 3 4"
+    puts "\nI'm thinking of a number combination now."
+  end
+
+  private
+
+  def reset
+    @code = []
+    @guess = nil
+    @guess_count = 0
+    @rounds = nil
+    ask_rounds
+  end
+
   def generate_code
     4.times { @code << rand(1..6) }
   end
@@ -101,14 +128,14 @@ class Mastermind
   end
 
   def ask_rounds
-    puts "How many guesses do you want?"
+    puts "\nHow many guesses do you want?"
     puts "Enter a number between 4-12."
     answer = gets.chomp.to_i
     if answer.between?(4, 12)
       @rounds = answer
       puts "Great. You have chosen #{@rounds} rounds. Good luck!"
     else
-      puts "I don't understand that. Try again."
+      puts "\nI don't understand that. Try again."
       puts " "
       ask_rounds
     end
@@ -118,27 +145,3 @@ end
 
 # Let the game begin!
 game = Mastermind.new
-
-puts "Welcome to Mastermind!"
-puts " "
-puts "Your job is to guess my combination of 4 numbers."
-puts "Each number is between 1-6."
-puts " "
-game.ask_rounds
-puts " "
-puts "You will get feedback from me after each guess:"
-puts " "
-puts "● = Correct number and position."
-puts "○ = The number exists in the combination but this is not the position."
-puts "  = Wrong number."
-puts " "
-puts "You guess by writing the four numbers (between 1-6) like this:"
-puts "1 2 3 4"
-puts " "
-puts "I'm thinking of a number combination now."
-
-until game.game_over?
-  game.guess_and_evaluate
-end
-
-game.won? ? puts("You won!!") : puts("You lost :-(")
