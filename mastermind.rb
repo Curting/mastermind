@@ -10,25 +10,28 @@
 
 class Mastermind
 
+  attr_reader :play
+
   def initialize
     @code = []
     @guess = nil
     @guess_count = 0
+    @rounds = nil
+    @play = true
 
     generate_code
   end
   
   def generate_code
     4.times { @code << rand(1..6) }
-    puts "The code is: #{@code}"
   end
 
   def guess_and_evaluate
     if @guess_count == 0
       puts "What's your first guess?"
     else
-      puts "You've got #{12 - @guess_count} guesses left."
-      puts "What's your guess?"
+      puts "You've got #{@rounds - @guess_count} guesses left."
+      puts "What's your next guess?"
     end
     # Extract numbers (strings in array) and turn them into integers
     @guess = gets.scan(/\d/).map(&:to_i)
@@ -86,7 +89,7 @@ class Mastermind
   end
 
   def lost?
-    @guess_count >= 12
+    @guess_count >= @rounds
   end
 
   def won?
@@ -97,28 +100,40 @@ class Mastermind
     won? || lost?
   end
 
+  def ask_rounds
+    puts "How many guesses do you want?"
+    puts "Enter a number between 4-12."
+    answer = gets.chomp.to_i
+    if answer.between?(4, 12)
+      @rounds = answer
+      puts "Great. You have chosen #{@rounds} rounds. Good luck!"
+    else
+      puts "I don't understand that. Try again."
+      puts " "
+      ask_rounds
+    end
+  end
+
 end
 
 # Let the game begin!
-
 game = Mastermind.new
 
 puts "Welcome to Mastermind!"
-puts "Your job is to guess my combination of 4 numbers within 12 guesses."
+puts " "
+puts "Your job is to guess my combination of 4 numbers."
 puts "Each number is between 1-6."
+puts " "
+game.ask_rounds
 puts " "
 puts "You will get feedback from me after each guess:"
 puts " "
 puts "● = Correct number and position."
 puts "○ = The number exists in the combination but this is not the position."
-puts "Nothing equals a wrong number."
+puts "  = Wrong number."
 puts " "
-puts "You guess by writing the four numbers (between 1-6) in any of these styles:"
-puts "1234"
+puts "You guess by writing the four numbers (between 1-6) like this:"
 puts "1 2 3 4"
-puts "1,2,3,4"
-puts "1, 2, 3, 4"
-puts "Or if you're really crazy: 1!NFH 2FNAWU88_3hmS,4. It's ok. I'll figure it out."
 puts " "
 puts "I'm thinking of a number combination now."
 
@@ -126,7 +141,4 @@ until game.game_over?
   game.guess_and_evaluate
 end
 
-
-
-
-
+game.won? ? puts("You won!!") : puts("You lost :-(")
