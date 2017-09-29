@@ -12,7 +12,8 @@ class Mastermind
 
   def initialize
     @code = []
-    @rounds_count = 0
+    @guess = nil
+    @guess_count = 0
 
     generate_code
   end
@@ -22,14 +23,34 @@ class Mastermind
     puts "The code is: #{@code}"
   end
 
-  def evaluate(guess)
+  def guess_and_evaluate
+    puts "What's your guess?"
+    @guess = gets.scan(/\d/)
+    if valid_guess?
+      evaluate
+    else
+      puts "What? I don't understand that. Give me 4 numbers between 1-6, please."
+      guess_and_evaluate
+  end
+
+  def valid_guess?
+    @guess.length == 4 &&  valid_guess_range?
+  end
+
+  def valid_guess_range? # Refactor
+    valid = true
+    @guess.each { |x| valid = false unless x.between?(1,6) }
+    valid
+  end
+
+  def evaluate
     answer = [" ", " ", " ", " "]
     # Duplicate temp_code so it doesn't point directly to @code (destructive)
     temp_code = @code.dup
 
     # Correct color and position = ●
     temp_code.each_with_index do |x, index|
-      if x == guess[index]
+      if x == @guess[index]
         answer[index] = "●"
         # Remove the used color (to avoid false duplicates)
         temp_code[index] = nil
@@ -37,32 +58,54 @@ class Mastermind
     end
 
     # Correct color but WRONG position = ○
-    guess.each_with_index do |x, index|
+    @guess.each_with_index do |x, index|
       if temp_code.include?(x) && answer[index] != "●"
         answer[index] = "○"
         # Remove the used color by finding the index
         temp_code[temp_code.index(x)] = nil
       end
     end
-
-    @rounds_count += 1
+    
     answer
   end
 
+  def lost?
+    @guess_count >= 12
+  end
 
+  def won?
+    @guess == @code
+  end
+
+  def game_over?
+    won? || lost?
+  end
 
 end
 
+# Let the game begin!
+
+game = Mastermind.new
+
 puts "Welcome to Mastermind!"
-puts "Your job is to guess a combination of 4 numbers."
+puts "Your job is to guess my combination of 4 numbers within 12 guesses."
 puts "Each number is between 1-6."
 puts " "
-puts "You will get feedback after each guess:"
+puts "You will get feedback from me after each guess:"
 puts " "
 puts "● = Correct number and position."
 puts "○ = The number exists in the combination but this is not the position."
 puts "Nothing equals a wrong number."
 puts " "
+puts "You guess by writing the four numbers in any of these styles:"
+puts "1234"
+puts "1 2 3 4"
+puts "1,2,3,4"
+puts "1, 2, 3, 4"
+puts "Or if you're really crazy: 1!NFH 2FNAWU88_3hmS,4. It's ok. I'll figure it out."
+puts " "
+puts "I'm thinking of a number combination now."
+
 
 
 
