@@ -24,23 +24,31 @@ class Mastermind
   end
 
   def guess_and_evaluate
-    puts "What's your guess?"
-    @guess = gets.scan(/\d/)
+    if @guess_count == 0
+      puts "What's your first guess?"
+    else
+      puts "You've got #{12 - @guess_count} guesses left."
+      puts "What's your guess?"
+    end
+    # Extract numbers (strings in array) and turn them into integers
+    @guess = gets.scan(/\d/).map(&:to_i)
+
     if valid_guess?
       evaluate
+      feedback(evaluate)
+      @guess_count += 1
     else
       puts "What? I don't understand that. Give me 4 numbers between 1-6, please."
       guess_and_evaluate
+    end
   end
 
   def valid_guess?
-    @guess.length == 4 &&  valid_guess_range?
+    @guess.length == 4 &&  valid_number_range?
   end
 
-  def valid_guess_range? # Refactor
-    valid = true
-    @guess.each { |x| valid = false unless x.between?(1,6) }
-    valid
+  def valid_number_range? # Refactor
+    @guess.all? { |number| number.between?(1, 6) }
   end
 
   def evaluate
@@ -65,8 +73,16 @@ class Mastermind
         temp_code[temp_code.index(x)] = nil
       end
     end
-    
+
     answer
+  end
+
+  def feedback(evaluation)
+    puts "-----------------"
+    puts "| #{@guess[0]} | #{@guess[1]} | #{@guess[2]} | #{@guess[3]} |"
+    puts "-----------------"
+    puts "| #{evaluation[0]} | #{evaluation[1]} | #{evaluation[2]} | #{evaluation[3]} |"
+    puts "-----------------"
   end
 
   def lost?
@@ -97,7 +113,7 @@ puts "● = Correct number and position."
 puts "○ = The number exists in the combination but this is not the position."
 puts "Nothing equals a wrong number."
 puts " "
-puts "You guess by writing the four numbers in any of these styles:"
+puts "You guess by writing the four numbers (between 1-6) in any of these styles:"
 puts "1234"
 puts "1 2 3 4"
 puts "1,2,3,4"
@@ -105,6 +121,10 @@ puts "1, 2, 3, 4"
 puts "Or if you're really crazy: 1!NFH 2FNAWU88_3hmS,4. It's ok. I'll figure it out."
 puts " "
 puts "I'm thinking of a number combination now."
+
+until game.game_over?
+  game.guess_and_evaluate
+end
 
 
 
