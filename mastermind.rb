@@ -39,6 +39,18 @@ class Mastermind
     puts "\nI'm thinking of a number combination now."
   end
 
+  def play_mode
+    puts "Do you want to be the Codemaker or the Codebreaker?"
+    puts ">> [1] Codemaker"
+    puts ">> [2] Codebreaker"
+    input = gets.chomp.to_i
+    until input == 1 || input == 2
+      "What? Type 1 for Codemaker or 2 for Codebreaker, please:"
+      input = gets.chomp.to_i
+    end
+    input == 1 ? @player = Codemaker.new : @player = Codebreaker.new
+  end
+
   private
 
   def reset
@@ -141,6 +153,17 @@ class Mastermind
     end
   end
 
+end
+
+class Codebreaker < Mastermind
+  def initialize
+    @code = []
+    @guess = nil
+    @guess_count = 0
+    @rounds = nil
+  end
+
+  
 end
 
 # Let the game begin!
