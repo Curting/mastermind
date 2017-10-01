@@ -5,19 +5,18 @@ class Mastermind
     @guess = nil
     @guess_count = 0
     @rounds = nil
-
-    welcome_message
-    play_game
   end
     
   def play_game
-    generate_code
+    play_mode
+    @player.instructions
+    @player.generate_code
 
-    until game_over?
-      guess_and_evaluate
+    until @player.game_over?
+      @player.guess_and_evaluate
     end
 
-    won? ? puts("You won!!") : puts("You lost :-(")
+    @player.won? ? puts("You won!!") : puts("You lost :-(")
     sleep(3)
     puts "\nLet's play again?"
     sleep(2)
@@ -25,22 +24,9 @@ class Mastermind
     play_game
   end
 
-  def welcome_message
-    puts "\nWelcome to Mastermind!"
-    puts "\nYour job is to guess my combination of 4 numbers."
-    puts "Each number is between 1-6."
-    ask_rounds
-    puts "\nYou will get feedback from me after each guess:"
-    puts "\n● = Correct number and position."
-    puts "○ = The number exists in the combination but this is not the position."
-    puts "  = Wrong number."
-    puts "\nYou guess by writing the four numbers (between 1-6) like this:"
-    puts "1 2 3 4"
-    puts "\nI'm thinking of a number combination now."
-  end
-
   def play_mode
-    puts "Do you want to be the Codemaker or the Codebreaker?"
+    puts "\nWelcome to Mastermind!"
+    puts "\nDo you want to be the Codemaker or the Codebreaker?"
     puts ">> [1] Codemaker"
     puts ">> [2] Codebreaker"
     input = gets.chomp.to_i
@@ -51,7 +37,7 @@ class Mastermind
     input == 1 ? @player = Codemaker.new : @player = Codebreaker.new
   end
 
-  private
+  protected
 
   def reset
     @code = []
@@ -63,26 +49,6 @@ class Mastermind
 
   def generate_code
     4.times { @code << rand(1..6) }
-  end
-
-  def guess_and_evaluate
-    if @guess_count == 0
-      puts "What's your first guess?"
-    else
-      puts "You've got #{@rounds - @guess_count} guesses left."
-      puts "What's your next guess?"
-    end
-    # Extract numbers (strings in array) and turn them into integers
-    @guess = gets.scan(/\d/).map(&:to_i)
-
-    if valid_guess?
-      evaluate
-      feedback(evaluate)
-      @guess_count += 1
-    else
-      puts "What? I don't understand that. Give me 4 numbers between 1-6, please."
-      guess_and_evaluate
-    end
   end
 
   def valid_guess?
@@ -156,6 +122,8 @@ class Mastermind
 end
 
 class Codebreaker < Mastermind
+  attr_reader :guess, :guess_count, :rounds
+
   def initialize
     @code = []
     @guess = nil
@@ -163,8 +131,41 @@ class Codebreaker < Mastermind
     @rounds = nil
   end
 
+  def instructions
+    puts "\nYour job is to guess my combination of 4 numbers."
+    puts "Each number is between 1-6."
+    ask_rounds
+    puts "\nYou will get feedback from me after each guess:"
+    puts "\n● = Correct number and position."
+    puts "○ = The number exists in the combination but this is not the position."
+    puts "  = Wrong number."
+    puts "\nYou guess by writing the four numbers (between 1-6) like this:"
+    puts "1 2 3 4"
+    puts "\nI'm thinking of a number combination now."
+  end
+
+  def guess_and_evaluate
+    if @guess_count == 0
+      puts "What's your first guess?"
+    else
+      puts "You've got #{@rounds - @guess_count} guesses left."
+      puts "What's your next guess?"
+    end
+    # Extract numbers (strings in array) and turn them into integers
+    @guess = gets.scan(/\d/).map(&:to_i)
+
+    if valid_guess?
+      evaluate
+      feedback(evaluate)
+      @guess_count += 1
+    else
+      puts "What? I don't understand that. Give me 4 numbers between 1-6, please."
+      guess_and_evaluate
+    end
+  end
   
 end
 
 # Let the game begin!
 game = Mastermind.new
+game.play_game
