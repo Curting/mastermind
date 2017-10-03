@@ -56,30 +56,30 @@ class Mastermind
     input.all? { |number| number.between?(1, 6) }
   end
 
-  def evaluate
-    @feedback = [" ", " ", " ", " "]
+  def evaluate(input)
+    feedback = [" ", " ", " ", " "]
     # Duplicate temp_code so it doesn't point directly to @code (destructive)
     temp_code = @code.dup
 
     # Correct color and position = ●
     temp_code.each_with_index do |x, index|
-      if x == @guess[index]
-        @feedback[index] = "●"
+      if x == input[index]
+        feedback[index] = "●"
         # Remove the used color (to avoid false duplicates)
         temp_code[index] = nil
       end
     end
 
     # Correct color but WRONG position = ○
-    @guess.each_with_index do |x, index|
-      if temp_code.include?(x) && @feedback[index] != "●"
-        @feedback[index] = "○"
+    input.each_with_index do |x, index|
+      if temp_code.include?(x) && feedback[index] != "●"
+        feedback[index] = "○"
         # Remove the used color by finding the index
         temp_code[temp_code.index(x)] = nil
       end
     end
 
-    @feedback
+    feedback
   end
 
   def show_board
@@ -152,7 +152,7 @@ class Codebreaker < Mastermind
     @guess = gets.scan(/\d/).map(&:to_i)
 
     if valid_input?(@guess)
-      evaluate
+      @feedback = evaluate(@guess)
       show_board
       @guess_count += 1
     else
@@ -219,24 +219,24 @@ class Codemaker < Mastermind
 
     @guess = guess_algorithm
 
-    if valid_input?(@guess)
-      evaluate
-      show_board
-      @guess_count += 1
-    else
-      puts "What? I don't understand that. Give me 4 numbers between 1-6, please."
-      guess_and_evaluate
-    end
+    @feedback = evaluate(@guess)
+    show_board
+    @guess_count += 1
   end
-
+  
   def guess_algorithm
     if @guess_count == 0
       [1, 1, 2, 2]
     else
-      evaluate
+      # If the code is |solution|, would I have gotten the previous
+      # feedback? If not, remove it from possible solutions.
+      @solutions.each do |solution|
+        @solutions.delete(solution) if evaluate(solution) != @feedback
+      end
+      # Let next guess be one of the remaining possible solutions
+      @solutions.sample
     end
   end
-
 end
 
 # Let the game begin!
