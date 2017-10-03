@@ -5,6 +5,7 @@ class Mastermind
     @guess = nil
     @guess_count = 0
     @rounds = nil
+    @feedback = nil
   end
     
   def play_game
@@ -56,14 +57,14 @@ class Mastermind
   end
 
   def evaluate
-    answer = [" ", " ", " ", " "]
+    @feedback = [" ", " ", " ", " "]
     # Duplicate temp_code so it doesn't point directly to @code (destructive)
     temp_code = @code.dup
 
     # Correct color and position = ●
     temp_code.each_with_index do |x, index|
       if x == @guess[index]
-        answer[index] = "●"
+        @feedback[index] = "●"
         # Remove the used color (to avoid false duplicates)
         temp_code[index] = nil
       end
@@ -71,21 +72,21 @@ class Mastermind
 
     # Correct color but WRONG position = ○
     @guess.each_with_index do |x, index|
-      if temp_code.include?(x) && answer[index] != "●"
-        answer[index] = "○"
+      if temp_code.include?(x) && @feedback[index] != "●"
+        @feedback[index] = "○"
         # Remove the used color by finding the index
         temp_code[temp_code.index(x)] = nil
       end
     end
 
-    answer
+    @feedback
   end
 
-  def feedback(evaluation)
+  def show_board
     puts "-----------------"
     puts "| #{@guess[0]} | #{@guess[1]} | #{@guess[2]} | #{@guess[3]} |"
     puts "-----------------"
-    puts "| #{evaluation[0]} | #{evaluation[1]} | #{evaluation[2]} | #{evaluation[3]} |"
+    puts "| #{@feedback[0]} | #{@feedback[1]} | #{@feedback[2]} | #{@feedback[3]} |"
     puts "-----------------"
   end
 
@@ -152,7 +153,7 @@ class Codebreaker < Mastermind
 
     if valid_input?(@guess)
       evaluate
-      feedback(evaluate)
+      show_board
       @guess_count += 1
     else
       puts "What? I don't understand that. Give me 4 numbers between 1-6, please."
@@ -166,6 +167,7 @@ class Codemaker < Mastermind
 
   def initialize
     @solutions = generate_solutions
+    @feedback = nil
     super
   end
 
@@ -214,16 +216,24 @@ class Codemaker < Mastermind
       puts "It's thinking about it's next guess..."
       sleep(2)
     end
-    # Extract numbers (strings in array) and turn them into integers
-    @guess = gets.scan(/\d/).map(&:to_i)
+
+    @guess = guess_algorithm
 
     if valid_input?(@guess)
       evaluate
-      feedback(evaluate)
+      show_board
       @guess_count += 1
     else
       puts "What? I don't understand that. Give me 4 numbers between 1-6, please."
       guess_and_evaluate
+    end
+  end
+
+  def guess_algorithm
+    if @guess_count == 0
+      [1, 1, 2, 2]
+    else
+      evaluate
     end
   end
 
