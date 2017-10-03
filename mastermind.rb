@@ -56,10 +56,10 @@ class Mastermind
     input.all? { |number| number.between?(1, 6) }
   end
 
-  def evaluate(input)
+  def evaluate(input, answer)
     feedback = [" ", " ", " ", " "]
     # Duplicate temp_code so it doesn't point directly to @code (destructive)
-    temp_code = @code.dup
+    temp_code = answer.dup
 
     # Correct color and position = ●
     temp_code.each_with_index do |x, index|
@@ -152,7 +152,7 @@ class Codebreaker < Mastermind
     @guess = gets.scan(/\d/).map(&:to_i)
 
     if valid_input?(@guess)
-      @feedback = evaluate(@guess)
+      @feedback = evaluate(@guess, @code)
       show_board
       @guess_count += 1
     else
@@ -219,7 +219,7 @@ class Codemaker < Mastermind
 
     @guess = guess_algorithm
 
-    @feedback = evaluate(@guess)
+    @feedback = evaluate(@guess, @code)
     show_board
     @guess_count += 1
   end
@@ -231,10 +231,10 @@ class Codemaker < Mastermind
       # If the code is |solution|, would I have gotten the previous
       # feedback? If not, remove it from possible solutions.
       @solutions.each do |solution|
-        @solutions.delete(solution) if evaluate(solution) != @feedback
+        @solutions.delete(solution) if evaluate(@guess, solution) != @feedback
       end
-      # Let next guess be one of the remaining possible solutions
-      @solutions.sample
+      # Let next guess be one of the remaining possible solutions and remove it
+      @solutions.delete(@solutions.sample)
     end
   end
 end
