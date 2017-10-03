@@ -47,16 +47,12 @@ class Mastermind
     ask_rounds
   end
 
-  def generate_code
-    4.times { @code << rand(1..6) }
+  def valid_input?(input)
+    input.length == 4 &&  valid_number_range?(input)
   end
 
-  def valid_guess?
-    @guess.length == 4 &&  valid_number_range?
-  end
-
-  def valid_number_range? # Refactor
-    @guess.all? { |number| number.between?(1, 6) }
+  def valid_number_range?(input) # Refactor
+    input.all? { |number| number.between?(1, 6) }
   end
 
   def evaluate
@@ -106,12 +102,11 @@ class Mastermind
   end
 
   def ask_rounds
-    puts "\nHow many guesses do you want?"
     puts "Enter a number between 4-12."
     answer = gets.chomp.to_i
     if answer.between?(4, 12)
       @rounds = answer
-      puts "Great. You have chosen #{@rounds} rounds. Good luck!"
+      puts "Great. You have chosen #{@rounds} rounds."
     else
       puts "\nI don't understand that. Try again."
       puts " "
@@ -122,14 +117,6 @@ class Mastermind
 end
 
 class Codebreaker < Mastermind
-  attr_reader :guess, :guess_count, :rounds
-
-  def initialize
-    @code = []
-    @guess = nil
-    @guess_count = 0
-    @rounds = nil
-  end
 
   def instructions
     puts "\nYour job is to guess my combination of 4 numbers."
@@ -144,6 +131,15 @@ class Codebreaker < Mastermind
     puts "\nI'm thinking of a number combination now."
   end
 
+  def ask_rounds
+    puts "\nHow many guesses would you like?"
+    super
+  end
+
+  def generate_code
+    4.times { @code << rand(1..6) }
+  end
+
   def guess_and_evaluate
     if @guess_count == 0
       puts "What's your first guess?"
@@ -154,7 +150,7 @@ class Codebreaker < Mastermind
     # Extract numbers (strings in array) and turn them into integers
     @guess = gets.scan(/\d/).map(&:to_i)
 
-    if valid_guess?
+    if valid_input?(@guess)
       evaluate
       feedback(evaluate)
       @guess_count += 1
@@ -164,6 +160,73 @@ class Codebreaker < Mastermind
     end
   end
   
+end
+
+class Codemaker < Mastermind
+
+  def initialize
+    @solutions = generate_solutions
+    super
+  end
+
+  def instructions
+    puts "\nWrite some fantastic instructions here!"
+    ask_rounds
+  end
+
+  def ask_rounds
+    puts "\nHow many guesses does the Gamebreaker have?"
+    super
+  end
+
+  def generate_code
+    puts "\nEnter your secret 4 digit code (numbers from 1-6):"
+
+    # Turn answer ("1234" etc.) to an array [1, 2, 3, 4]
+    answer = gets.chomp.scan(/\d/).map(&:to_i)
+    until valid_input?(answer)
+      puts "I don't understand your code. Please try again."
+      generate_code
+    end
+    @code = answer
+  end
+
+  def generate_solutions
+    solutions = []
+    1296.times do |x|
+      loop do
+        answer = [rand(1..6), rand(1..6), rand(1..6), rand(1..6)]
+        if !solutions.include?(answer)
+          solutions << answer
+          break
+        end
+      end
+    end
+    solutions.sort
+  end
+
+  def guess_and_evaluate
+    if @guess_count == 0
+      puts "The computer is thinking about it's first guess..."
+      sleep(2)
+    else
+      puts "The computer has #{@rounds - @guess_count} guesses left."
+      puts "It's thinking about it's next guess..."
+      sleep(2)
+    end
+    # Extract numbers (strings in array) and turn them into integers
+    @guess = gets.scan(/\d/).map(&:to_i)
+
+    if valid_input?(@guess)
+      evaluate
+      feedback(evaluate)
+      @guess_count += 1
+    else
+      puts "What? I don't understand that. Give me 4 numbers between 1-6, please."
+      guess_and_evaluate
+    end
+  end
+
 end
 
 # Let the game begin!
