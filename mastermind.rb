@@ -1,4 +1,5 @@
 class Mastermind
+  attr_accessor :rounds
 
   def initialize
     @code = []
@@ -10,23 +11,34 @@ class Mastermind
     
   def play_game
     play_mode
-    @player.instructions
+    puts "Got 'ya. And how many guesses do we play with?"
+    ask_rounds
     @player.generate_code
 
     until @player.game_over?
       @player.guess_and_evaluate
     end
 
-    @player.won? ? puts("You won!!") : puts("You lost :-(")
+    @player.game_over_message
     sleep(3)
-    puts "\nLet's play again?"
+    puts "\nThe game will reboot now to let you play again."
     sleep(2)
     reset
     play_game
   end
 
   def play_mode
-    puts "\nWelcome to Mastermind!"
+    puts "\nWelcome to...\n"
+    sleep(1)
+    puts " __  __           _                      _           _ "
+    puts "|  \\/  | __ _ ___| |_ ___ _ __ _ __ ___ (_)_ __   __| |"
+    puts "| |\\/| |/ _` / __| __/ _ \\ '__| '_ ` _ \\| | '_ \\ / _` |"
+    puts "| |  | | (_| \\__ \\ ||  __/ |  | | | | | | | | | | (_| |"
+    puts "|_|  |_|\\__,_|___/\\__\\___|_|  |_| |_| |_|_|_| |_|\\__,_|"                                                     
+
+    sleep(1)
+    instructions
+    sleep(2)
     puts "\nDo you want to be the Codemaker or the Codebreaker?"
     puts ">> [1] Codemaker"
     puts ">> [2] Codebreaker"
@@ -40,12 +52,26 @@ class Mastermind
 
   protected
 
+  def instructions
+    puts "\nThe Gamebreaker's job is to guess the Gamemaker's combination of 4 numbers."
+    puts "Each number is between 1-6."
+    puts "\nThe Gamebreaker will get feedback after each guess:"
+    puts "\n● = Correct number and position."
+    puts "○ = The number exists in the combination but this is not the position."
+    puts "  = Wrong number."
+    puts "\nThe Gamebreaker will guess by writing the four numbers (between 1-6) like this:"
+    puts "1 2 3 4"
+  end
+
+  def game_over_message
+    won? ? puts("#{@type.upcase} WON!! :-)") : puts("#{@type} lost! :-/")
+  end
+
   def reset
     @code = []
     @guess = nil
     @guess_count = 0
     @rounds = nil
-    ask_rounds
   end
 
   def valid_input?(input)
@@ -106,8 +132,8 @@ class Mastermind
     puts "Enter a number between 4-12."
     answer = gets.chomp.to_i
     if answer.between?(4, 12)
-      @rounds = answer
-      puts "Great. You have chosen #{@rounds} rounds."
+      @player.rounds = answer
+      puts "Great. You have chosen #{@player.rounds} rounds."
     else
       puts "\nI don't understand that. Try again."
       puts " "
@@ -119,17 +145,11 @@ end
 
 class Codebreaker < Mastermind
 
-  def instructions
-    puts "\nYour job is to guess my combination of 4 numbers."
-    puts "Each number is between 1-6."
-    ask_rounds
-    puts "\nYou will get feedback from me after each guess:"
-    puts "\n● = Correct number and position."
-    puts "○ = The number exists in the combination but this is not the position."
-    puts "  = Wrong number."
-    puts "\nYou guess by writing the four numbers (between 1-6) like this:"
-    puts "1 2 3 4"
-    puts "\nI'm thinking of a number combination now."
+  attr_reader :type
+
+  def initialize
+    @type = "You"
+    super
   end
 
   def ask_rounds
@@ -164,16 +184,13 @@ class Codebreaker < Mastermind
 end
 
 class Codemaker < Mastermind
+  attr_reader :type
 
   def initialize
     @solutions = generate_solutions
     @feedback = nil
+    @type = "The computer"
     super
-  end
-
-  def instructions
-    puts "\nWrite some fantastic instructions here!"
-    ask_rounds
   end
 
   def ask_rounds
@@ -182,7 +199,7 @@ class Codemaker < Mastermind
   end
 
   def generate_code
-    puts "\nEnter your secret 4 digit code (numbers from 1-6):"
+    puts "\nEnter your secret combination of 4 numbers (1-6):"
 
     # Turn answer ("1234" etc.) to an array [1, 2, 3, 4]
     answer = gets.chomp.scan(/\d/).map(&:to_i)
@@ -195,6 +212,7 @@ class Codemaker < Mastermind
 
   def generate_solutions
     solutions = []
+
     1296.times do |x|
       loop do
         answer = [rand(1..6), rand(1..6), rand(1..6), rand(1..6)]
@@ -204,6 +222,7 @@ class Codemaker < Mastermind
         end
       end
     end
+
     solutions.sort
   end
 
@@ -216,8 +235,9 @@ class Codemaker < Mastermind
       puts "It's thinking about it's next guess..."
       sleep(2)
     end
-    @guess = guess_algorithm
 
+    # Guess, get feedback and show board
+    @guess = guess_algorithm
     @feedback = evaluate(@guess, @code)
     show_board
     @guess_count += 1
@@ -233,6 +253,7 @@ class Codemaker < Mastermind
       @solutions.each do |solution|
         possible_solutions << solution if evaluate(@guess, solution) == @feedback
       end
+      # Let @solutions only consist of possible solutions
       @solutions = possible_solutions.dup
 
       # Let next guess be one of the remaining possible solutions and remove it
@@ -244,6 +265,3 @@ end
 # Let the game begin!
 game = Mastermind.new
 game.play_game
-
-# Next step: When a black peg is found, it should remain in the next guess.
-# 
