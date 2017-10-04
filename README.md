@@ -6,7 +6,7 @@ The crafting of the game has definitely been my biggest achievement to date. The
 
 I've kept my eyes of other people's solutions. The only help I've had is the usage of [Knudth's five-guess algorithm](https://en.wikipedia.org/wiki/Mastermind_(board_game)), which was a huge help in developing the AI in Gamemaker mode. This approach led me on a lot of creative "could this work?" detours, which I learned a lot from.
 
-### Play
+### Try it out
 Play my game [at Repl.it »](https://repl.it/MEd9/0)
 
 ### What it looks like
