@@ -216,7 +216,6 @@ class Codemaker < Mastermind
       puts "It's thinking about it's next guess..."
       sleep(2)
     end
-
     @guess = guess_algorithm
 
     @feedback = evaluate(@guess, @code)
@@ -225,14 +224,17 @@ class Codemaker < Mastermind
   end
   
   def guess_algorithm
+    possible_solutions = []
     if @guess_count == 0
-      [1, 1, 2, 2]
+      @solutions.delete([1, 1, 2, 2])
     else
       # If the code is |solution|, would I have gotten the previous
-      # feedback? If not, remove it from possible solutions.
+      # feedback? If true, add it to an array of possible solutions
       @solutions.each do |solution|
-        @solutions.delete(solution) if evaluate(@guess, solution) != @feedback
+        possible_solutions << solution if evaluate(@guess, solution) == @feedback
       end
+      @solutions = possible_solutions.dup
+
       # Let next guess be one of the remaining possible solutions and remove it
       @solutions.delete(@solutions.sample)
     end
@@ -242,3 +244,6 @@ end
 # Let the game begin!
 game = Mastermind.new
 game.play_game
+
+# Next step: When a black peg is found, it should remain in the next guess.
+# 
