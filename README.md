@@ -2,7 +2,7 @@
 
 The crafting of the game has definitely been my biggest achievement to date. There are two play modes:
 - **Gamemaker** => You set the code and the computer guess
-- **Gamebreaker** => The computer set the code and you guess
+- **Gamebreaker** => The computer sets the code and you guess
 
 I've kept my eyes of other people's solutions. The only help I've had is the usage of [Knudth's five-guess algorithm](https://en.wikipedia.org/wiki/Mastermind_(board_game)), which was a huge help in developing the AI in Gamemaker mode. This approach led me on a lot of creative "could this work?" detours, which I learned a lot from.
 
